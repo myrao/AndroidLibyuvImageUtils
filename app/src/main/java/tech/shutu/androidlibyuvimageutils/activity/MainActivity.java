@@ -50,7 +50,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.e(TAG, " position clicked => " + position);
-                Intent intent = new Intent(MainActivity.this, BitmapToYuvActivity.class);
+                Intent intent = new Intenlst(MainActivity.this, BitmapToYuvActivity.class);
                 startActivity(intent);
             }
         });
