@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">AndroidLibyuvImageUtils</string>
+
+    <string-array name="array_titles">
+        <item>bitmap to yuv</item>
+        <!--<item>yuv to bitmap</item>-->
+        <!--<item>rgb565 to yuv</item>-->
+
+    </string-array>
 </resources>

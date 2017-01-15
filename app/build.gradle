@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.application'
 
 android {
@@ -17,17 +19,56 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            jni.srcDirs = [] // disable automatic ndk-build call
+            jniLibs.srcDirs "src/main/jniLibs"
+        }
+    }
+
+    task ndkBuildYuvUtils(type: Exec) {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def command = properties.getProperty('ndk.dir', null) + "/ndk-build.cmd"
+            commandLine command, '-C', file('src/main/jni').absolutePath, "NDK_LIBS_OUT=../jniLibs"
+        } else {
+            def command = properties.getProperty('ndk.dir', null) + "/ndk-build"
+            commandLine command, '-C', file('src/main/jni').absolutePath, "NDK_LIBS_OUT=../jniLibs"
+        }
+    }
+
+// call regular ndk-build(.cmd) script
+//    task ndkBuild(type: Exec) {
+//        Properties properties = new Properties()
+//        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//            def command = properties.getProperty('ndk.dir', null) + "/ndk-build.cmd"
+//            commandLine command, '-C', file('src/main/jni').absolutePath, "NDK_LIBS_OUT=../jniLibs"
+//        } else {
+//            def command = properties.getProperty('ndk.dir', null) + "/ndk-build"
+//            commandLine command, '-C', file('src/main/jni/3rdParty/wang_ju_zhi_bo_jni').absolutePath, "APP_BUILD_SCRIPT=Android.mk", "NDK_LIBS_OUT=output"
+//            commandLine command, '-C', file('src/main/jni').absolutePath, "NDK_LIBS_OUT=../jniLibs"
+//        }
+//    }
+
+    tasks.withType(JavaCompile) {
+            //        compileTask -> compileTask.dependsOn ndkBuild
+        compileTask -> compileTask.dependsOn ndkBuildYuvUtils
+    }
+
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.0.1'
     testCompile 'junit:junit:4.12'
-
     compile 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
-
+    compile 'com.android.support:recyclerview-v7:25.0.1'
 }
