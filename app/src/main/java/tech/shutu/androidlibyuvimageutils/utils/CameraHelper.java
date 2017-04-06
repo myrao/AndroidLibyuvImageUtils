@@ -44,24 +44,4 @@ public class CameraHelper {
         }
         return true;
     }
-
-    public static boolean selectCameraColorFormat(Camera.Parameters parameters) {
-        List<Integer> srcColorTypes = new LinkedList<>();
-        List<Integer> supportedPreviewFormates = parameters.getSupportedPreviewFormats();
-        for (int colortype : supportedSrcVideoFrameColorType) {
-            if (supportedPreviewFormates.contains(colortype)) {
-                srcColorTypes.add(colortype);
-            }
-        }
-        //select preview colorformat
-        if (srcColorTypes.contains(ImageFormat.NV21)) {
-            PREVIEW_FORMAT = ImageFormat.NV21;
-        } else if ((srcColorTypes.contains(ImageFormat.YV12))) {
-            PREVIEW_FORMAT = ImageFormat.YV12;
-        } else {
-            Log.e(TAG, "!!!!!!!!!!!UnSupport,previewColorFormat");
-            return false;
-        }
-        return true;
-    }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
@@ -26,6 +27,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tech.shutu.androidlibyuvimageutils.R;
 import tech.shutu.androidlibyuvimageutils.utils.CameraHelper;
+import tech.shutu.androidlibyuvimageutils.utils.FileUtil;
 import tech.shutu.jni.YuvUtils;
 
 import static tech.shutu.androidlibyuvimageutils.utils.CameraHelper.DST_HEIGHT;
@@ -69,6 +71,8 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
     }
 
     private void initSurfaceHolder() {
+        YuvUtils.allocateMemo(CameraHelper.PREVIEW_WIDTH * CameraHelper.PREVIEW_HEIGHT * 3 / 2, 0,
+                CameraHelper.DST_WIDTH * CameraHelper.DST_HEIGHT * 3 / 2);
         mSurfaceHolder = svCameraPreview.getHolder();
         mSurfaceHolder.addCallback(this);
         mSurfaceHolder.setKeepScreenOn(true);
@@ -100,11 +104,11 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        saveToStorage(camera, data);
+        saveToStorage(data);
         mCamera.addCallbackBuffer(data);
     }
 
-    private void saveToStorage(final Camera camera, final byte[] data) {
+    private void saveToStorage(final byte[] data) {
         if (executorService == null) executorService = Executors.newCachedThreadPool();
         executorService.execute(new Runnable() {
             @Override
@@ -113,22 +117,8 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
                 YuvUtils.scaleAndRotateYV12ToI420(data, dstYuv,
                         CameraHelper.PREVIEW_WIDTH, CameraHelper.PREVIEW_HEIGHT, 90, DST_WIDTH, CameraHelper.DST_HEIGHT);
                 if (dstYuv != null && dstYuv.length > 0) {
-                    int width = DST_WIDTH;
-                    int height = DST_HEIGHT;
-
-                    YuvImage yuv = new YuvImage(dstYuv, CameraHelper.PREVIEW_FORMAT, width, height, null);
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
-                    byte[] outYuv = out.toByteArray();
-                    final Bitmap bp = BitmapFactory.decodeByteArray(outYuv, 0, outYuv.length).copy(Bitmap.Config.ARGB_8888, true);
-                    new Handler(getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ivPreview.setImageBitmap(bp);
-                        }
-                    });
+                    FileUtil.saveYuvToSdCardStorage(dstYuv); // save yuv bytes to sdcard
                 }
-//                FileUtil.saveYuvToSdCardStorage(dstYuv); // save yuv bytes to sdcard
             }
         });
     }
@@ -145,21 +135,20 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
             throw new NullPointerException("camera can not open");
         }
         mParams = mCamera.getParameters();
+        mParams.setPreviewFormat(ImageFormat.YV12);
         if (CameraHelper.configCamera(mCamera)) {
-            if (CameraHelper.selectCameraColorFormat(mParams)) {
-                setCameraDisplayOrientation(this, cameraId, mCamera);
-                try {
-                    mCamera.setPreviewDisplay(mSurfaceHolder);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    mCamera.setPreviewCallback(this);
-                    mCamera.startPreview();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    finish();
-                }
+            setCameraDisplayOrientation(this, cameraId, mCamera);
+            try {
+                mCamera.setPreviewDisplay(mSurfaceHolder);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                mCamera.setPreviewCallback(this);
+                mCamera.startPreview();
+            } catch (Exception e) {
+                e.printStackTrace();
+                finish();
             }
         }
     }
@@ -226,9 +215,8 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // TODO: add setContentView(...) invocation
-        ButterKnife.bind(this);
+    protected void onDestroy() {
+        super.onDestroy();
+        YuvUtils.releaseMemo();
     }
 }
