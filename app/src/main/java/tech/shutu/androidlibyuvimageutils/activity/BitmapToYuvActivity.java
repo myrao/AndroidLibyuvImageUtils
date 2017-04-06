@@ -1,5 +1,7 @@
 package tech.shutu.androidlibyuvimageutils.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
@@ -86,6 +88,11 @@ public class BitmapToYuvActivity extends BaseActivity {
 
     private boolean isUseLibyuv;
     private boolean isLibyuvScaled;
+
+    public static void startActivity(Context ctx) {
+        Intent it = new Intent(ctx, BitmapToYuvActivity.class);
+        ctx.startActivity(it);
+    }
 
     @Override
     public void setContentView() {

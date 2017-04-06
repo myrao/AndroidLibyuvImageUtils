@@ -12,9 +12,11 @@ public class YuvUtils {
 
     public static native void rgbToYuvByAlgorithms(int[] aRGB, byte[] dst_yuv, int src_width, int src_height);
 
-    public static native void rgbToYuvBylibyuv(Bitmap srcBitmap, byte[] dst_yuv);
+    public static native void rgbToYuvBylibyuv(Object srcBitmap, byte[] dst_yuv);
 
-    public static native void rgbToYuvWidthScaleBylibyuv(Bitmap bitmap, byte[] dst_yuv, int src_width, int src_height, int dst_width, int dst_height);
+    public static native void rgbToYuvWidthScaleBylibyuv(Object bitmap, byte[] dst_yuv, int src_width, int src_height, int dst_width, int dst_height);
+
+    public static native void scaleAndRotateYV12ToI420(byte[] src_data, byte[] dst_data, int src_width, int src_height, int rotation, int dst_width, int dst_height);
 
     public static native void releaseMemo();
 

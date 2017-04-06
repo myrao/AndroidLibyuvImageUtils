@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <SurfaceView
+        android:id="@+id/sv_camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id="@+id/iv_preview"
+        android:layout_width="90dp"
+        android:layout_height="160dp"
+        android:layout_margin="10dp" />
+
+    <ImageButton
+        android:id="@+id/btn_switch_camera"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"
+        android:background="#00000000"
+        android:padding="5dp"
+        android:src="@mipmap/ic_change_camera"
+        android:textColor="#ffffff" />
+
+</RelativeLayout>

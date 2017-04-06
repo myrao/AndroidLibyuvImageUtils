@@ -59,4 +59,3 @@ JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_releaseMemo
 }
 #endif
 #endif
-

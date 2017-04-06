@@ -60,6 +60,11 @@ public class MainActivity extends BaseActivity {
     public void initData() {
     }
 
+    public static void startActivity(Context ctx) {
+        Intent it = new Intent(ctx, MainActivity.class);
+        ctx.startActivity(it);
+    }
+
 
     public static class MyRecyclerAdapter extends BaseAdapter {
 

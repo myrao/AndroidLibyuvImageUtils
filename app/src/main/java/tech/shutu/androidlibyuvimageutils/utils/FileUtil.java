@@ -1,7 +1,7 @@
 package tech.shutu.androidlibyuvimageutils.utils;
 
 import android.os.Environment;
-import android.widget.Toast;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import tech.shutu.androidlibyuvimageutils.application.MyApplication;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
@@ -20,6 +18,8 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
  */
 
 public class FileUtil {
+    private static final String TAG = "FileUtil";
+
     /**
      * save image to sdcard path: Pictures/MyTestImage/
      * 原始帧保存到SD卡
@@ -34,7 +34,7 @@ public class FileUtil {
             FileOutputStream fos = new FileOutputStream(imageFile);
             fos.write(imageData);
             fos.close();
-            Toast.makeText(MyApplication.getContext(), "Yuv file saved to path: " + imageFile.getPath(), Toast.LENGTH_LONG).show();
+            Log.d(TAG, " Yuv file saved to path: " + imageFile.getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             SysUtil.o("File not found: " + e.getMessage());

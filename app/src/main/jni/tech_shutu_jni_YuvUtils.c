@@ -18,6 +18,7 @@ char *input_src_data, *output_src_data, *input_scale_data,
         *src_y_data, *src_u_data, *src_v_data,
         *dst_y_data, *dst_u_data, *dst_v_data, *dst_data4,
         *dst_y_processed, *dst_u_processed, *dst_v_processed,
+        *dst_y_processed_final, *dst_u_processed_final, *dst_v_processed_final,
         *dst_rgb_y,  *dst_rgb_u, *dst_rgb_v,
         *dst_yuv_data;
 
@@ -50,6 +51,9 @@ JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_allocateMemo
     dst_y_processed = malloc(sizeof(char) * (len_scale * 2 / 3));
     dst_u_processed = malloc(sizeof(char) * len_scale / 6);
     dst_v_processed = malloc(sizeof(char) * len_scale / 6);
+    dst_y_processed_final = malloc(sizeof(char) * (len_scale * 2 / 3));
+    dst_u_processed_final = malloc(sizeof(char) * len_scale / 6);
+    dst_v_processed_final = malloc(sizeof(char) * len_scale / 6);
   }
 
 
@@ -225,6 +229,66 @@ JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_rgbToYuvWidthScaleBylibyuv
        (*env)->SetByteArrayRegion (env, yuv, 0, len_scale, (jbyte*)(output_processed_data));
   }
 
+JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_scaleAndRotateYV12ToI420
+ (JNIEnv *env, jclass jcls, jbyteArray src_data, jbyteArray dst_data, jint src_width, jint src_height,
+       jint rotation_degree, jint dst_width, jint dst_height){
+
+       (*env)->GetByteArrayRegion (env, src_data, 0, len_src, (jbyte*)(input_src_data));
+
+       // get y plane
+       memcpy(src_y_data, input_src_data , (len_src * 2 / 3));
+       // get u plane
+       memcpy(src_u_data, input_src_data + (len_src * 2 / 3), len_src / 6);
+       // get v plane
+       memcpy(src_v_data, input_src_data + (len_src * 5 / 6 ), len_src / 6);
+
+       /**
+        * format: YV12 (YYYYY YYYY VV UU)
+        * method: scale
+        *
+        */
+       I420Scale( src_y_data,       src_width,
+                  src_v_data,       src_width / 2,
+                  src_u_data,       src_width / 2,
+                  src_width,        src_height,
+                  dst_y_processed,  dst_height,
+                  dst_v_processed, (dst_height ) / 2,
+                  dst_u_processed, (dst_height ) / 2,
+                  dst_height,       dst_width,
+                  3);
+
+       /**
+       * format: YV12 (YYYYY YYYY VV UU)
+       * method: rotate
+       */
+       I420Rotate( dst_y_processed,  dst_height,
+                   dst_v_processed, (dst_height ) / 2,
+                   dst_u_processed, (dst_height ) / 2,
+                   dst_y_processed_final,  dst_width,
+                   dst_v_processed_final, (dst_width ) / 2,
+                   dst_u_processed_final, (dst_width ) / 2,
+                   dst_height, dst_width,
+                   rotation_degree);
+
+    //I420Rotate(const uint8* src_y, int src_stride_y,
+    //           const uint8* src_u, int src_stride_u,
+    //           const uint8* src_v, int src_stride_v,
+    //           uint8* dst_y, int dst_stride_y,
+    //           uint8* dst_u, int dst_stride_u,
+    //           uint8* dst_v, int dst_stride_v,
+    //           int width, int height,
+    //           RotationMode mode) {
+
+    // merge y plane to output_data
+        memcpy(output_processed_data, dst_y_processed_final, (len_scale * 2 / 3 ) );
+        // merge v plane to output_data
+        memcpy(output_processed_data+(len_scale * 2 / 3), dst_u_processed_final, (len_scale / 6 ) );
+        // merge u plane to output_data
+        memcpy(output_processed_data+(len_scale * 5 / 6 ),dst_v_processed_final, (len_scale / 6) );
+        // output to the dst_data
+        (*env)->SetByteArrayRegion (env, dst_data, 0, len_scale, (jbyte*)(output_processed_data));
+  }
+
 
 JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_releaseMemo
   (JNIEnv *env, jclass jcls) {
@@ -241,6 +305,9 @@ JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_releaseMemo
             free(dst_y_processed);
             free(dst_u_processed);
             free(dst_v_processed);
+            free(dst_y_processed_final);
+            free(dst_u_processed_final);
+            free(dst_v_processed_final);
 
             input_src_data         = NULL;
             src_y_data             = NULL;
@@ -254,6 +321,9 @@ JNIEXPORT void JNICALL Java_tech_shutu_jni_YuvUtils_releaseMemo
             dst_y_processed        = NULL;
             dst_u_processed        = NULL;
             dst_v_processed        = NULL;
+            dst_y_processed_final        = NULL;
+            dst_u_processed_final        = NULL;
+            dst_v_processed_final        = NULL;
 
         LOGD("########## Release OVER#############\n");
   }
