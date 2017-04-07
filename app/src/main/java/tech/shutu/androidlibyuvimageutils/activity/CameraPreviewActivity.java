@@ -11,6 +11,7 @@ import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -38,6 +39,7 @@ import static tech.shutu.androidlibyuvimageutils.utils.CameraHelper.DST_WIDTH;
  */
 public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
+    private static final String TAG = "YUVDEMO";
     public static int DISPLAY_DEGREE = 0;
 
     @BindView(R.id.sv_camera_preview)
@@ -112,12 +114,14 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                long startTimeMs = System.currentTimeMillis();
                 byte[] dstYuv = new byte[DST_WIDTH * DST_HEIGHT * 3 / 2];
                 YuvUtils.scaleAndRotateYV12ToI420(data, dstYuv,
                         CameraHelper.PREVIEW_WIDTH, CameraHelper.PREVIEW_HEIGHT, 90, DST_WIDTH, CameraHelper.DST_HEIGHT);
                 if (dstYuv != null && dstYuv.length > 0) {
-                    FileUtil.saveYuvToSdCardStorage(dstYuv); // save yuv bytes to sdcard
+//                    FileUtil.saveYuvToSdCardStorage(dstYuv); // save yuv bytes to sdcard
                 }
+                Log.e(TAG, "libyuv cost time  = " + String.valueOf(System.currentTimeMillis() - startTimeMs));
             }
         });
     }
