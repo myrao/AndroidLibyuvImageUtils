@@ -13,14 +13,12 @@ import java.util.List;
  * src : search librestreaming at GitHub
  */
 public class CameraHelper {
+    private static final String TAG = CameraHelper.class.getSimpleName();
+
     public static final int PREVIEW_WIDTH = 1280;
     public static final int PREVIEW_HEIGHT = 720;
     public static final int DST_WIDTH = 504;
     public static final int DST_HEIGHT = 896;
-
-    private static final String TAG = CameraHelper.class.getSimpleName();
-    public static int PREVIEW_FORMAT = ImageFormat.NV21; // Default NV21
-    private static int[] supportedSrcVideoFrameColorType = new int[]{ImageFormat.NV21, ImageFormat.YV12};
 
     public static boolean configCamera(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
@@ -35,6 +33,7 @@ public class CameraHelper {
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
             }
         }
+        parameters.setPreviewFormat(ImageFormat.YV12);
         parameters.setPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
         try {
             camera.setParameters(parameters);

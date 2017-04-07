@@ -48,7 +48,6 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
     ImageView ivPreview;
 
     private Camera mCamera;
-    private Camera.Parameters mParams;
     private SurfaceHolder mSurfaceHolder;
     private boolean isFrontCamera = false;
 
@@ -134,8 +133,6 @@ public class CameraPreviewActivity extends BaseActivity implements SurfaceHolder
         if (null == createCamera(cameraId)) {
             throw new NullPointerException("camera can not open");
         }
-        mParams = mCamera.getParameters();
-        mParams.setPreviewFormat(ImageFormat.YV12);
         if (CameraHelper.configCamera(mCamera)) {
             setCameraDisplayOrientation(this, cameraId, mCamera);
             try {
